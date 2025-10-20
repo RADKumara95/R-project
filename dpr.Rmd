@@ -1,0 +1,36 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+airData <- read_csv("C:/Users/HP/Downloads/who_ambient_air_quality_database_version_2024_(v6.1) (1).csv")
+airData
+```
+
+
+
+
+
+```{r}
+df
+```
+
+
+
+```{r}
+is.null(df)
+```
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+selected_columns<-airdata %>%
+  select(country_name, city, year, pm25_concentration, pm10_concentration
+,no2_concentration , latitude, longitude)
+  selected_columns
+```
+
+
