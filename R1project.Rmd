@@ -1,0 +1,78 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+read.csv("C:/Users/HP/Documents/R1-project/who_ambient_air_quality_database_version_2024_(v6.1) (3).csv")
+```
+```{r}
+df
+```
+```{r}
+airData<-read.csv("C:/Users/HP/Documents/R1-project/who_ambient_air_quality_database_version_2024_(v6.1) (3).csv")
+airData
+```
+
+```{r}
+library(dplyr)
+```
+```{r}
+selected_columns<-airData %>%
+  select(country_name, city, year, pm25_concentration, pm10_concentration
+,no2_concentration )
+  selected_columns
+```
+
+```{r}
+library(tidyverse)
+
+```
+```{r}
+airData <- distinct(airData)
+
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+
+countries <- c("India","Sweden","South Africa",
+               "United States of America","Brazil")
+airData <- airData %>% filter(country_name %in% countries)
+```
+
+```{r}
+airData$year  <- as.numeric(airData$year)
+airData$pm25_concentration <- as.numeric(airData$pm25_concentration)
+airData$pm10_concentration  <- as.numeric(airData$pm10_concentration)
+airData$no2_concentration   <- as.numeric(airData$no2_concentration)
+```
+```{r}
+airData <- airData %>%
+  mutate(across(c(pm25_concentration, pm10_concentration, no2_concentration), ~ ifelse(. <= 0, NA, .)))
+
+```
+```{r}
+any(is.na(airData))
+```
+
+```{r}
+sum(is.na(airData))
+```
+
+```{r}
+airData <- na.omit(airData)
+
+```
+```{r}
+clean_data=airData
+
+```
+```{r}
+view(clean_data)
+```
+
