@@ -6,9 +6,14 @@ output: html_notebook
 ```{r}
 read.csv("C:/Users/HP/Documents/R1-project/who_ambient_air_quality_database_version_2024_(v6.1) (3).csv")
 ```
+
+###Data cleaning part
+
 ```{r}
 df
 ```
+
+
 ```{r}
 airData<-read.csv("C:/Users/HP/Documents/R1-project/who_ambient_air_quality_database_version_2024_(v6.1) (3).csv")
 airData
@@ -69,10 +74,59 @@ airData <- na.omit(airData)
 
 ```
 ```{r}
-clean_data=airData
+clean_data<-airData
 
 ```
 ```{r}
 view(clean_data)
+```
+
+###Exploratorty Data part
+
+```{r}
+glimpse(airData)
+```
+```{r}
+summary(airData)
+```
+```{r}
+country_summary <- airData %>%
+  group_by(country_name) %>%
+  summary(avg_PM25 = mean(pm25_concentration, na.rm = TRUE),
+            avg_PM10 = mean(pm10_concentration, na.rm = TRUE),
+            avg_NO2  = mean(no2_tempcov,  na.rm = TRUE))
+print(country_summary)
+```
+
+```{r}
+library(ggplot2)
+```
+
+
+
+
+##average PM25_concentration per country(bar chart)
+
+```{r}
+ggplot(country_summary, aes(x = country_name, y = avg_PM25, fill = country_name)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average PM25_concentration by Country name", y = "PM25_concentration (µg/m³)") +
+  theme_minimal()
+```
+
+##full PM25_concentration distribution(box plot)
+
+```{r}
+ggplot(airData, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
+  geom_boxplot() +
+  labs(title = "PM25_concentration Distribution by Country_name", y = "PM25_concentration (µg/m³)") +
+  theme_minimal()
+```
+
+###Test Statistical Significance 
+
+```{r}
+anova_PM25 <- aov(pm25_concentration ~ Country, airData = airData)
+summary(anova_PM25)
 ```
 
