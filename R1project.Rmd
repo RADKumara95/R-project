@@ -10,7 +10,7 @@ read.csv("C:/Users/HP/Documents/R1-project/who_ambient_air_quality_database_vers
 ###Data cleaning part
 
 ```{r}
-df
+df 
 ```
 
 
@@ -70,33 +70,77 @@ sum(is.na(airData))
 ```
 
 ```{r}
-airData <- na.omit(airData)
 
+countries <- c("India","Sweden","South Africa",
+               "United States of America","Brazil")
+
+df_sel <- airData %>%
+  filter(country_name %in% countries, ,city%in%city,year%in%year,pm25_concentration%in%pm25_concentration,pm10_concentration%in%no2_concentration) %>%
+  drop_na(pm25_concentration, pm10_concentration,no2_concentration)
+```
+
+```{r}
+airData <- airData %>% select(-c(who_region,iso3,version,pm10_tempcov,pm25_tempcov,no2_tempcov,type_of_stations,reference,web_link,population,population_source,latitude,longitude,who_ms))
+```
+```{r}
+head(airData)
 ```
 ```{r}
 clean_data<-airData
-
 ```
+
+
 ```{r}
 view(clean_data)
 ```
 
-###Exploratorty Data part
+###Exploratorty Data Analysis part
 
 ```{r}
-glimpse(airData)
+glimpse(clean_data)
 ```
 ```{r}
-summary(airData)
+summary(clean_data)
 ```
 ```{r}
-country_summary <- airData %>%
+country_summary <- clean_data %>%
   group_by(country_name) %>%
-  summary(avg_PM25 = mean(pm25_concentration, na.rm = TRUE),
+  summary(avg_PM25 =mean(pm25_concentration, na.rm = TRUE),
             avg_PM10 = mean(pm10_concentration, na.rm = TRUE),
-            avg_NO2  = mean(no2_tempcov,  na.rm = TRUE))
-print(country_summary)
+            avg_NO2  =mean(no2_tempcov,  na.rm = TRUE))
+(country_summary)
 ```
+
+```{r}
+outliers <- clean_data %>%
+  group_by(country_name) %>%
+  mutate(
+    Q1 = quantile(pm25_concentration, 0.25, na.rm=TRUE),
+    Q3 = quantile(pm25_concentration, 0.75, na.rm=TRUE),
+    IQR = Q3 - Q1,
+    lower = Q1 - 1.5 * IQR,
+    upper = Q3 + 1.5 * IQR,
+    is_outlier = (pm25_concentration < lower | pm25_concentration > upper)
+  ) %>%
+  filter(is_outlier) %>%
+  select(country_name, city, year, pm25_concentration, lower, upper)
+
+outliers %>% count(country_name,sort=TRUE)
+```
+
+
+
+```{r}
+clean_data %>% summarise(
+  n_rows = n(),
+  n_countries = n_distinct(country_name),
+  n_cities = n_distinct(city),
+  n_years = n_distinct(year)
+)
+```
+
+
+
 
 ```{r}
 library(ggplot2)
@@ -108,16 +152,17 @@ library(ggplot2)
 ##average PM25_concentration per country(bar chart)
 
 ```{r}
-ggplot(country_summary, aes(x = country_name, y = avg_PM25, fill = country_name)) +
+ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
   geom_bar(stat = "identity") +
-  labs(title = "Average PM25_concentration by Country name", y = "PM25_concentration (µg/m³)") +
+  labs(title = "Average PM25_Concentration by Country", 
+       y = "PM25_Concentration (µg/m³)") +
   theme_minimal()
 ```
 
 ##full PM25_concentration distribution(box plot)
 
 ```{r}
-ggplot(airData, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
+ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
   geom_boxplot() +
   labs(title = "PM25_concentration Distribution by Country_name", y = "PM25_concentration (µg/m³)") +
   theme_minimal()
@@ -125,8 +170,23 @@ ggplot(airData, aes(x = country_name, y = pm25_concentration, fill = country_nam
 
 ###Test Statistical Significance 
 
+
 ```{r}
-anova_PM25 <- aov(pm25_concentration ~ Country, airData = airData)
+colnames(clean_data)
+```
+
+```{r}
+anova_PM25 <- aov(pm25_concentration ~ country_name, data = clean_data)
 summary(anova_PM25)
+
+```
+```{r}
+kruskal.test(pm25_concentration~ country_name, data = clean_data)
+
+```
+```{r}
+TukeyHSD(anova_PM25)     
+
+
 ```
 
