@@ -1,0 +1,230 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+read.csv("C:/Users/HP/Documents/R1-project/who_ambient_air_quality_database_version_2024_(v6.1) (3).csv")
+```
+
+###Data cleaning part
+
+```{r}
+df 
+```
+
+
+```{r}
+airData<-read.csv("C:/Users/HP/Documents/R1-project/who_ambient_air_quality_database_version_2024_(v6.1) (3).csv")
+airData
+```
+
+```{r}
+library(dplyr)
+```
+```{r}
+selected_columns<-airData %>%
+  select(country_name, city, year, pm25_concentration, pm10_concentration
+,no2_concentration )
+  selected_columns
+```
+
+```{r}
+library(tidyverse)
+
+```
+```{r}
+airData <- distinct(airData)
+
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+
+countries <- c("India","Sweden","South Africa",
+               "United States of America","Brazil")
+airData <- airData %>% filter(country_name %in% countries)
+```
+
+```{r}
+airData$year  <- as.numeric(airData$year)
+airData$pm25_concentration <- as.numeric(airData$pm25_concentration)
+airData$pm10_concentration  <- as.numeric(airData$pm10_concentration)
+airData$no2_concentration   <- as.numeric(airData$no2_concentration)
+```
+```{r}
+airData <- airData %>%
+  mutate(across(c(pm25_concentration, pm10_concentration, no2_concentration), ~ ifelse(. <= 0, NA, .)))
+
+```
+```{r}
+any(is.na(airData))
+```
+
+```{r}
+sum(is.na(airData))
+```
+
+```{r}
+
+countries <- c("India","Sweden","South Africa",
+               "United States of America","Brazil")
+
+df_sel <- airData %>%
+  filter(country_name %in% countries, ,city%in%city,year%in%year,pm25_concentration%in%pm25_concentration,pm10_concentration%in%no2_concentration) %>%
+  drop_na(pm25_concentration, pm10_concentration,no2_concentration)
+```
+
+```{r}
+airData <- airData %>% select(-c(who_region,iso3,version,pm10_tempcov,pm25_tempcov,no2_tempcov,type_of_stations,reference,web_link,population,population_source,latitude,longitude,who_ms))
+```
+```{r}
+head(airData)
+```
+```{r}
+clean_data<-airData
+```
+
+
+```{r}
+view(clean_data)
+```
+
+###Exploratorty Data Analysis part
+
+```{r}
+glimpse(clean_data)
+```
+```{r}
+summary(clean_data)
+```
+```{r}
+country_summary <- clean_data %>%
+  group_by(country_name) %>%
+  summary(avg_PM25 =mean(pm25_concentration, na.rm = TRUE),
+            avg_PM10 = mean(pm10_concentration, na.rm = TRUE),
+            avg_NO2  =mean(no2_tempcov,  na.rm = TRUE))
+(country_summary)
+```
+
+```{r}
+outliers <- clean_data %>%
+  group_by(country_name) %>%
+  mutate(
+    Q1 = quantile(pm25_concentration, 0.25, na.rm=TRUE),
+    Q3 = quantile(pm25_concentration, 0.75, na.rm=TRUE),
+    IQR = Q3 - Q1,
+    lower = Q1 - 1.5 * IQR,
+    upper = Q3 + 1.5 * IQR,
+    is_outlier = (pm25_concentration < lower | pm25_concentration > upper)
+  ) %>%
+  filter(is_outlier) %>%
+  select(country_name, city, year, pm25_concentration, lower, upper)
+
+outliers %>% count(country_name,sort=TRUE)
+```
+
+
+
+```{r}
+clean_data %>% summarise(
+  n_rows = n(),
+  n_countries = n_distinct(country_name),
+  n_cities = n_distinct(city),
+  n_years = n_distinct(year)
+)
+```
+
+
+
+
+```{r}
+library(ggplot2)
+```
+
+###visualization
+
+
+```{r}
+df_viz <- clean_data %>% filter(year >= 2018 & year <= 2019)
+```
+```{r}
+ggplot(df_viz, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "PM25_ Concentration by Continent (2010–2020)",
+       y = "PM25_concentration (µg/m³)", x = "") +
+  theme_minimal()
+```
+
+
+
+
+##average PM25_concentration per country(bar chart)
+
+```{r}
+ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average PM25_Concentration by Country", 
+       y = "PM25_Concentration (µg/m³)") +
+  theme_minimal()
+```
+
+##full PM25_concentration distribution(box plot)
+
+```{r}
+ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
+  geom_boxplot() +
+  labs(title = "PM25_concentration Distribution by Country_name", y = "PM25_concentration (µg/m³)") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data_years, aes(x = country_name, y = pm25_concentration, fill = factor(year))) +
+  geom_boxplot(position = position_dodge(0.8)) +
+  labs(
+    title = "Comparing PM2.5 Levels by Country (2015 vs 2018)",
+    x = "Country",
+    y = "PM2.5 (µg/m³)",
+    fill = "Year"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+###Test Statistical Significance 
+
+
+```{r}
+colnames(clean_data)
+```
+
+```{r}
+anova_PM25 <- aov(pm25_concentration ~ country_name, data = clean_data)
+summary(anova_PM25)
+
+```
+```{r}
+kruskal.test(pm25_concentration~ country_name, data = clean_data)
+
+```
+```{r}
+TukeyHSD(anova_PM25)     
+
+
+```
+
