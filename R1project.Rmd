@@ -146,6 +146,20 @@ clean_data %>% summarise(
 library(ggplot2)
 ```
 
+###visualization
+
+
+```{r}
+df_viz <- clean_data %>% filter(year >= 2018 & year <= 2019)
+```
+```{r}
+ggplot(df_viz, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "PM25_ Concentration by Continent (2010–2020)",
+       y = "PM25_concentration (µg/m³)", x = "") +
+  theme_minimal()
+```
+
 
 
 
@@ -167,6 +181,30 @@ ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_
   labs(title = "PM25_concentration Distribution by Country_name", y = "PM25_concentration (µg/m³)") +
   theme_minimal()
 ```
+
+```{r}
+ggplot(data_years, aes(x = country_name, y = pm25_concentration, fill = factor(year))) +
+  geom_boxplot(position = position_dodge(0.8)) +
+  labs(
+    title = "Comparing PM2.5 Levels by Country (2015 vs 2018)",
+    x = "Country",
+    y = "PM2.5 (µg/m³)",
+    fill = "Year"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+
+
+
+
+
+
+
+
 
 ###Test Statistical Significance 
 
