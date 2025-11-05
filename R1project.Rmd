@@ -140,25 +140,98 @@ clean_data %>% summarise(
 ```
 
 
+###visualization
 
 
 ```{r}
 library(ggplot2)
 ```
 
-###visualization
 
 
 ```{r}
-df_viz <- clean_data %>% filter(year >= 2018 & year <= 2019)
+df_viz <- clean_data %>% filter(year <= 2012 )
 ```
 ```{r}
 ggplot(df_viz, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
   geom_boxplot(outlier.alpha = 0.3) +
-  labs(title = "PM25_ Concentration by Continent (2010–2020)",
-       y = "PM25_concentration (µg/m³)", x = "") +
+  labs(title = "PM25_ Concentration by country_name (2012)",
+       y = "PM25_concentration (µg/m³)", x = "Country Name ") +
   theme_minimal()
 ```
+
+```{r}
+df_viz <- clean_data %>% filter(year <= 2020 )
+
+```
+```{r}
+ggplot(df_viz, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "PM25_ Concentration by country_name (2020)",
+       y = "PM25_concentration (µg/m³)", x = "Country Name ") +
+  theme_minimal()
+```
+
+```{r}
+df_viz <- clean_data %>% filter(year <= 2012 )
+
+```
+
+
+
+
+```{r}
+ggplot(df_viz, aes(x = country_name, y = no2_concentration, fill = country_name)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "NO2_ Concentration by country_name (2012)",
+       y = "NO2_concentration (µg/m³)", x = "Country Name ") +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+df_viz <- clean_data %>% filter(year <= 2020 )
+
+```
+
+
+
+```{r}
+ggplot(df_viz, aes(x = country_name, y = no2_concentration, fill = country_name)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "NO2_ Concentration by country_name (2020)",
+       y = "NO2_concentration (µg/m³)", x = "Country Name ") +
+  theme_minimal()
+```
+
+```{r}
+df_viz <- clean_data %>%
+  filter(year %in% c(2012, 2020))
+```
+
+
+```{r}
+table(df_viz$year)
+```
+
+
+
+```{r}
+ggplot(df_viz, aes(x = no2_concentration, y = pm25_concentration, color = country_name)) +
+  geom_point(alpha = 0.7, size = 3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~year) +
+  labs(
+    title = "NO₂ vs PM25 by country_name
+  (2012 vs 2020)",
+    x = "NO₂ (µg/m³)",
+    y = "PM25 (µg/m³)"
+  ) +
+  theme_minimal()
+```
+
 
 
 
@@ -173,20 +246,21 @@ ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_
   theme_minimal()
 ```
 
-##full PM25_concentration distribution(box plot)
+
+
+
+
+
 
 ```{r}
-ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_name)) +
-  geom_boxplot() +
-  labs(title = "PM25_concentration Distribution by Country_name", y = "PM25_concentration (µg/m³)") +
-  theme_minimal()
-```
+data_years <- clean_data %>%
+  filter(year %in% c(2012, 2020)) %>%
+  filter(!is.na(pm25_concentration))
 
-```{r}
 ggplot(data_years, aes(x = country_name, y = pm25_concentration, fill = factor(year))) +
   geom_boxplot(position = position_dodge(0.8)) +
   labs(
-    title = "Comparing PM2.5 Levels by Country (2015 vs 2018)",
+    title = "Comparing PM25_concentration Levels by Country (2012 vs 2020)",
     x = "Country",
     y = "PM2.5 (µg/m³)",
     fill = "Year"
@@ -194,8 +268,10 @@ ggplot(data_years, aes(x = country_name, y = pm25_concentration, fill = factor(y
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-
 ```
+
+
+
 
 
 
