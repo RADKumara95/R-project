@@ -206,6 +206,35 @@ ggplot(df_viz, aes(x = country_name, y = no2_concentration, fill = country_name)
   theme_minimal()
 ```
 
+```{r}
+df_viz <- clean_data %>%
+  filter(year %in% c(2012, 2020))
+```
+
+
+```{r}
+table(df_viz$year)
+```
+
+
+
+```{r}
+ggplot(df_viz, aes(x = no2_concentration, y = pm25_concentration, color = country_name)) +
+  geom_point(alpha = 0.7, size = 3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  facet_wrap(~year) +
+  labs(
+    title = "NO₂ vs PM25 by country_name
+  (2012 vs 2020)",
+    x = "NO₂ (µg/m³)",
+    y = "PM25 (µg/m³)"
+  ) +
+  theme_minimal()
+```
+
+
+
+
 
 ##average PM25_concentration per country(bar chart)
 
@@ -216,6 +245,8 @@ ggplot(clean_data, aes(x = country_name, y = pm25_concentration, fill = country_
        y = "PM25_Concentration (µg/m³)") +
   theme_minimal()
 ```
+
+
 
 
 
